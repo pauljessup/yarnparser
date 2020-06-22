@@ -9,12 +9,15 @@ https://github.com/YarnSpinnerTool/YarnEditor
 A simple example of how to use:
 
 --this loads the testYarn.json file
+
 local test=yarnparse:load_file("testYarn.json")
 
 --this gets a specific node
+
 local node=yarnparse:get_node("Start")
 
 --and this will print out the body.
+
 print(node.body)
 
   
