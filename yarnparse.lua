@@ -22,6 +22,13 @@ function string:split(delimiter)
     return result
 end
 
+function string:extract(open, close)
+    local c=text:split(open)
+    local b=c[1]
+    b=b:split(close)
+    return b[1]
+end
+
 yarnparse={
     json=require("json.json")
 } 
@@ -36,7 +43,6 @@ yarnparse.load_file=function(self, filename)
     --now to create a loopup table, for faster loading by title
     for i,v in ipairs(self.nodes) do
         self.hashmap[v.title]=i
-        --error(v .. " " .. i)
     end
 end
 
@@ -51,7 +57,7 @@ yarnparse.get_choices=function(self, text)
             v=v:split(']]')
             v=v[1]
             local nxt=v:split("|")
-            --returns a table of choices, incl the text and the node it links to--
+            --splits it so there's the text for the choice, and the node it links to.
             choices[#choices+1]={text=nxt[1], node=nxt[2]}
         end
     end
@@ -60,8 +66,33 @@ end
 
 --returns a list of each line of the body
 --which will make it easier to parse commands
-yarnparse.parse_body=function(self, node)
-    return node.body:split('\n')
+yarnparse.parse_body=function(self, text)
+    local lines=text:split('\n')
+    return {
+         text=text,
+         lines=lines,
+         at=0,
+         total=#lines,
+         traverse=function(self)
+            self.at=self.at+1
+            if(self.at>self.total) then return nil end
+            local ret=self.lines[self.at]
+            --check to see if it's a command, if so, do that.
+                if string.match(ret, "<<") then
+                    ret=ret:extract("<<", ">>")
+                    return loadstring(ret)
+                end
+            return ret
+         end,
+         done=function(self)
+            if(self.at>self.total) then return true else return false end
+         end
+    }
+end
+
+--traveses through the node choice
+yarnparse.make_choice=function(self, node, choice)
+    return yarnparse.get_node(node.choices[choice].node)
 end
 
 yarnparse.get_node=function(self, node)
@@ -75,7 +106,7 @@ yarnparse.get_node=function(self, node)
 
     --load the node through the ID
     local v=self.nodes[node]
-    
+
     --grab the body, and any choices it has
     local body, choices=self:get_choices(v.body)
     
@@ -85,7 +116,7 @@ yarnparse.get_node=function(self, node)
             id=node,
             title=v.title,
             tags=v.tags:split(", "),
-            body=body,
+            body=yarnparse:parse_body(v.body),
             choices=choices,
             colorId=v.colorId
         }
