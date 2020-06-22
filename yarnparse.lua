@@ -46,33 +46,6 @@ yarnparse.load=function(self, filename)
         nodes=nodes,
         hashmap=hashmap,
 
-        --get node function--
-        get_node=function(self, node)
-            --if it's not a node id, use the lookup table
-            if(type(node)~="number") then
-                --error if title does not exist in lookup table.
-                if(self.hashmap[node]==nil) then error("Node " .. node .. " does not exist in " .. self.file  .. ".  Please check spelling.") end
-                --if all is kosher, use that lookup table
-                node=self.hashmap[node]
-            end
-        
-            --load the node through the ID
-            local v=self.nodes[node]
-        
-            --grab the body, and any choices it has
-            local body, choices=self:get_choices(v.body)
-            
-            return {
-                    --this just returns a list containing all the info from
-                    --a node. 
-                    id=node,
-                    title=v.title,
-                    tags=v.tags:split(", "),
-                    body=yarnparse:parse_body(v.body),
-                    choices=choices,
-                    colorId=v.colorId
-                }
-        end,
 
         --get choice function
         get_choices=function(self, text)
@@ -94,9 +67,20 @@ yarnparse.load=function(self, filename)
             end,
 
             --parse body function
+            remove_blanks=function(self, lines)
+                --remove any blank lines.
+                local buffer={}
+                for i,v in ipairs(lines) do
+                    if(string.len(v)>0) then
+                        buffer[#buffer+1]=v
+                    end
+                end
+                return buffer
+            end,
 
             parse_body=function(self, text)
                 local lines=text:split('\n')
+                lines=self:remove_blanks(lines)
                 return {
                      text=text,
                      lines=lines,
@@ -108,16 +92,15 @@ yarnparse.load=function(self, filename)
                         local ret=self.lines[self.at]
                         --check to see if it's a command, if so, do that.
                             if string.match(ret, "<<") then
-                                ret=ret:extract("<<", ">>")
-                                local f=loadstring(ret)
+                                local f=loadstring(ret:extract("<<", ">>"))
                                 f()
                                 --let the main program know we're running a command.
-                                return ret, true
+                                return self.lines[self.at], true
                             end
                         return ret, false
                      end,
                      done=function(self)
-                        if(self.at>self.total) then return true else return false end
+                        if(self.at>=self.total) then return true else return false end
                      end
                 }
             end,
@@ -136,6 +119,8 @@ yarnparse.load=function(self, filename)
             
                 --grab the body, and any choices it has
                 local body, choices=self:get_choices(v.body)
+                local has_choices=false
+                if(#choices>0) then has_choices=true end
                 
                 return {
                         --this just returns a list containing all the info from
@@ -143,8 +128,9 @@ yarnparse.load=function(self, filename)
                         id=node,
                         title=v.title,
                         tags=v.tags:split(", "),
-                        body=self:parse_body(v.body),
+                        body=self:parse_body(body),
                         choices=choices,
+                        has_choices=has_choices,
                         colorId=v.colorId
                     }
             end,
