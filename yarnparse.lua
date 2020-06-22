@@ -48,9 +48,11 @@ yarnparse.get_choices=function(self, text)
     local b=c[1]
     for i,v in ipairs(c) do
         if(i>1) then
-            v=v:gsub(']]', '')
+            v=v:split(']]')
+            v=v[1]
             local nxt=v:split("|")
-            choices[nxt[1]]=nxt[2]
+            --returns a table of choices, incl the text and the node it links to--
+            choices[#choices+1]={text=nxt[1], node=nxt[2]}
         end
     end
     return b, choices
@@ -65,6 +67,9 @@ end
 yarnparse.get_node=function(self, node)
     --if it's not a node id, use the lookup table
     if(type(node)~="number") then
+        --error if title does not exist in lookup table.
+        if(self.hashmap[node]==nil) then error("Node " .. node .. " does not exist in " .. self.file  .. ".  Please check spelling.") end
+        --if all is kosher, use that lookup table
         node=self.hashmap[node]
     end
 
