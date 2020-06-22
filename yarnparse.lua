@@ -3,11 +3,6 @@
 --or do something with tags, etc. This just allows you
 --to load, etc, nodes from a yarn exported to json.
 
--- some ideas:
--- add in a line by line return
--- will be easier to get choices etc, by line then
--- will also be easier to hit commands then.
-
 
 function string:split(delimiter)
     local result = { }
@@ -23,8 +18,8 @@ function string:split(delimiter)
 end
 
 function string:extract(open, close)
-    local c=text:split(open)
-    local b=c[1]
+    local c=self:split(open)
+    local b=c[2]
     b=b:split(close)
     return b[1]
 end
@@ -80,9 +75,12 @@ yarnparse.parse_body=function(self, text)
             --check to see if it's a command, if so, do that.
                 if string.match(ret, "<<") then
                     ret=ret:extract("<<", ">>")
-                    return loadstring(ret)
+                    local f=loadstring(ret)
+                    f()
+                    --let the main program know we're running a command.
+                    return ret, true
                 end
-            return ret
+            return ret, false
          end,
          done=function(self)
             if(self.at>self.total) then return true else return false end
