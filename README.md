@@ -10,11 +10,11 @@ A simple example of how to use:
 
 --this loads the testYarn.json file
 
-local test=yarnparse:load_file("testYarn.json")
+local yarn=yarnparse:load_file("testYarn.json")
 
 --this gets a specific node
 
-local node=yarnparse:get_node("Start")
+local node=yarn:get_node("Start")
 
 --and this will print out the body.
 
