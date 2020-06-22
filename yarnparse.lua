@@ -23,14 +23,21 @@ function string:split(delimiter)
 end
 
 yarnparse={
-    json=require("json.json"),
-    nodes={},
-    file=""
+    json=require("json.json")
 } 
 
 yarnparse.load_file=function(self, filename)
+    self.nodes={}
+    self.hashmap={}
+    self.file=filename
+
     local parsed, size=love.filesystem.read("string", filename)
     self.nodes=self.json.decode(parsed)
+    --now to create a loopup table, for faster loading by title
+    for i,v in ipairs(self.nodes) do
+        self.hashmap[v.title]=i
+        --error(v .. " " .. i)
+    end
 end
 
 yarnparse.get_choices=function(self, text)
@@ -52,44 +59,30 @@ end
 --returns a list of each line of the body
 --which will make it easier to parse commands
 yarnparse.parse_body=function(self, node)
-    if(type(node)~="number") then
-        node=yarnparse:get_node(node)    
-    else
-        node=self.nodes[node]
-    end
-    return body:split('\n')
+    return node.body:split('\n')
 end
 
-yarnparse.get_node=function(self, title)
-    if(type(title)=="number") then
-        local v=self.nodes[title]
-        local body, choices=self:get_choices(v.body)
-        return {
+yarnparse.get_node=function(self, node)
+    --if it's not a node id, use the lookup table
+    if(type(node)~="number") then
+        node=self.hashmap[node]
+    end
+
+    --load the node through the ID
+    local v=self.nodes[node]
+    
+    --grab the body, and any choices it has
+    local body, choices=self:get_choices(v.body)
+    
+    return {
             --this just returns a list containing all the info from
             --a node. 
-            id=i,
+            id=node,
             title=v.title,
             tags=v.tags:split(", "),
             body=body,
             choices=choices,
             colorId=v.colorId
         }
-    else
-            for i,v in ipairs(self.nodes) do
-                if(v.title==title) then
-                    local body, choices=self:get_choices(v.body)
-                    return {
-                        --this just returns a list containing all the info from
-                        --a node. 
-                        id=i,
-                        title=v.title,
-                        tags=v.tags:split(", "),
-                        body=body,
-                        choices=choices,
-                        colorId=v.colorId
-                    }
-                end
-            end
-    end
 end
 
