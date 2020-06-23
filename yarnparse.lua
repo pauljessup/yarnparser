@@ -46,12 +46,21 @@ yarnparse.load=function(self, filename)
         nodes=nodes,
         hashmap=hashmap,
 
+        parse_possible_choices=function(self, text)
+            local c=text:split("%[%[Answer:")
+            --two different autobuild ways of doing answer. the lower case
+            --always has a space, while upper case does not. Weird. Funky. 
+            if(#c<1) then
+                c=text:split("%[%[ answer:")
+            end
+            return c
+        end,
 
         --get choice function
         get_choices=function(self, text)
             --this parses the choices it uses to connect to other nodes
             --and returns it as a list.
-                local c=text:split("%[%[Answer:")
+                local c=self:parse_possible_choices(text)
                 local choices={}
                 local b=c[1]
                 for i,v in ipairs(c) do
