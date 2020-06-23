@@ -20,6 +20,7 @@ end
 function string:extract(open, close)
     local c=self:split(open)
     local b=c[2]
+    if(b==nil) then return nil end
     b=b:split(close)
     return b[1]
 end
@@ -46,40 +47,46 @@ yarnparse.load=function(self, filename)
         nodes=nodes,
         hashmap=hashmap,
 
-        parse_possible_choices=function(self, text)
-            local c=text:split("%[%[Answer:")
-            --two different autobuild ways of doing answer. the lower case
-            --always has a space, while upper case does not. Weird. Funky. 
-            if(#c<1) then
-                c=text:split("%[%[ answer:")
-            end
 
-            return c
+        --instead, we need to create a parser,
+        --this checks for [[ ]] and gets what is between them
+        --then it checks for answer and | and that should do it.
+
+        get_parse_strings=function(self, text)
+            local s=text:extract("%[%[", "%]%]")
+            if(s==nil) then return {found=false} end
+            local func=s:split(":") --action name
+            return{
+                found=true,
+                action=string.gsub(func[1]:lower(), "%s+", ""), --removes any whitespace, and lower cases it.
+                arguments=func[2]
+            }
         end,
 
-        --get choice function
         get_choices=function(self, text)
-            --this parses the choices it uses to connect to other nodes
-            --and returns it as a list.
-                local c=self:parse_possible_choices(text)
-                local choices={}
-                local b=c[1]
-                for i,v in ipairs(c) do
-                    if(i>1) then
-                        v=v:split(']]')
-                        v=v[1]
-                        local nxt=v:split("|")
-                        if(#nxt==1) then 
+            local lines=text:split('\n')
+            local c=""
+            local choices={}
+            for i, v in ipairs(lines) do
+                local parser=self:get_parse_strings(v)
+                if(not parser.found) then
+                    c=c .. v .. '\n'
+                else
+                    if(parser.action=="answer") then
+                        local nxt=parser.arguments:split("|")
+                        if(nxt[1]==' ') or (nxt[1]=='') then 
                             --if no split text, use  the node title as the answer text.
-                            choices[#choices+1]={text=nxt[1], node=nxt[1]}
+                            choices[#choices+1]={text=nxt[2], node=nxt[2]}
                         else
                             --splits it so there's the text for the choice, and the node it links to.
-                            choices[#choices+1]={text=nxt[1], node=nxt[2]}
-                        end
+                            choices[#choices+1]={text=nxt[2], node=nxt[1]}
+                        end                    
                     end
                 end
-                return b, choices
-            end,
+            end
+            return c, choices
+        end,
+
 
             --parse body function
             remove_blanks=function(self, lines)
