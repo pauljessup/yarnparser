@@ -86,6 +86,15 @@ yarnparse.load=function(self, filename)
                      lines=lines,
                      at=0,
                      total=#lines,
+                     who=function(self)
+                        if(self.at>self.total) then return nil end
+                        local text=self.lines[self.at]
+                        if string.match(text, ": ") then
+                            local buff=text:split(": ")
+                            return {who=buff[1], what=buff[2]}
+                        end
+                        return {who="none", what="text"}
+                     end,
                      traverse=function(self)
                         self.at=self.at+1
                         if(self.at>self.total) then return nil end
