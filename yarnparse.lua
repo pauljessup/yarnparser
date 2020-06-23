@@ -53,6 +53,7 @@ yarnparse.load=function(self, filename)
             if(#c<1) then
                 c=text:split("%[%[ answer:")
             end
+
             return c
         end,
 
@@ -68,8 +69,13 @@ yarnparse.load=function(self, filename)
                         v=v:split(']]')
                         v=v[1]
                         local nxt=v:split("|")
-                        --splits it so there's the text for the choice, and the node it links to.
-                        choices[#choices+1]={text=nxt[1], node=nxt[2]}
+                        if(#nxt==1) then 
+                            --if no split text, use  the node title as the answer text.
+                            choices[#choices+1]={text=nxt[1], node=nxt[1]}
+                        else
+                            --splits it so there's the text for the choice, and the node it links to.
+                            choices[#choices+1]={text=nxt[1], node=nxt[2]}
+                        end
                     end
                 end
                 return b, choices
