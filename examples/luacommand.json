@@ -2,7 +2,7 @@
 	{
 		"title": "Start",
 		"tags": "example, added lua code",
-		"body": "This is a simple example, showing off how you can parse lua code in a command\n\n<< lua: love.graphics.print(\"WILD\", 10, 10) >>",
+		"body": "This is a simple example, showing off how you can parse lua code in a command\n Hello \n << lua: error(\"Hey look at that, we forced an error using lua code inside our yarn file.\") >> \n whatever",
 		"position": {
 			"x": 301,
 			"y": 200
