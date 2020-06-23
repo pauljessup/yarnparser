@@ -46,14 +46,15 @@ yarnparse.load=function(self, filename)
         file=filename,
         nodes=nodes,
         hashmap=hashmap,
+        exposed={},
 
 
-        --instead, we need to create a parser,
         --this checks for [[ ]] and gets what is between them
-        --then it checks for answer and | and that should do it.
-
-        get_parse_strings=function(self, text)
-            local s=text:extract("%[%[", "%]%]")
+        --this can be used for parsing any bbcodes, but for now
+        --it's just being used as an improved version of get_choices.
+        get_parse_strings=function(self, prefix, text, postfix)
+            local s=text:extract(prefix, postfix)
+            --local s=text:extract("%[%[", "%]%]")
             if(s==nil) then return {found=false} end
             local func=s:split(":") --action name
             return{
@@ -63,12 +64,13 @@ yarnparse.load=function(self, filename)
             }
         end,
 
+        --improved version. Now it dynamically does what you think it should do...lol
         get_choices=function(self, text)
             local lines=text:split('\n')
             local c=""
             local choices={}
             for i, v in ipairs(lines) do
-                local parser=self:get_parse_strings(v)
+                local parser=self:get_parse_strings("%[%[", v, "%]%]")
                 if(not parser.found) then
                     c=c .. v .. '\n'
                 else
@@ -99,6 +101,10 @@ yarnparse.load=function(self, filename)
                 end
                 return buffer
             end,
+            
+            expose_function=function(self, key, expose)
+                self.exposed[key]=expose
+            end,
 
             parse_body=function(self, text)
                 local lines=text:split('\n')
@@ -113,9 +119,9 @@ yarnparse.load=function(self, filename)
                         local text=self.lines[self.at]
                         if string.match(text, ": ") then
                             local buff=text:split(": ")
-                            return {who=buff[1], what=buff[2]}
+                            return {who=buff[1], text=buff[2]}
                         end
-                        return {who="none", what="text"}
+                        return {who="none", text=text}
                      end,
                      traverse=function(self)
                         self.at=self.at+1
@@ -123,12 +129,20 @@ yarnparse.load=function(self, filename)
                         local ret=self.lines[self.at]
                         --check to see if it's a command, if so, do that.
                             if string.match(ret, "<<") then
-                                local f=loadstring(ret:extract("<<", ">>"))
-                                f()
-                                --let the main program know we're running a command.
+                                  local p=self:get_parse_strings("<<", ret, ">>")
+                                  if(p.action=="lua") then
+                                    local f=loadstring(p.arguments)
+                                    f()
+                                  else
+                                    if(self.exposed[p.action]) then
+                                        self.exposed[p.action](p.arguments)
+                                    else
+                                        error("Yarn attempted to call " .. p.action .. " but this is not a script call. Please check your spelling, and try again")
+                                    end
+                                 end
                                 return self.lines[self.at], true
                             end
-                        return ret, false
+                        return self:who(ret), false
                      end,
                      done=function(self)
                         if(self.at>=self.total) then return true else return false end
