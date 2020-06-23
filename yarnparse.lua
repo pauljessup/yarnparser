@@ -81,7 +81,7 @@ yarnparse.load=function(self, filename)
                             choices[#choices+1]={text=nxt[2], node=nxt[2]}
                         else
                             --splits it so there's the text for the choice, and the node it links to.
-                            choices[#choices+1]={text=nxt[2], node=nxt[1]}
+                            choices[#choices+1]={text=nxt[1], node=nxt[2]}
                         end                    
                     end
                 end
@@ -123,6 +123,17 @@ yarnparse.load=function(self, filename)
                         end
                         return {who="none", text=text}
                      end,
+                     get_parse_strings=function(self, prefix, text, postfix)
+                        local s=text:extract(prefix, postfix)
+                        --local s=text:extract("%[%[", "%]%]")
+                        if(s==nil) then return {found=false} end
+                        local func=s:split(":") --action name
+                        return{
+                            found=true,
+                            action=string.gsub(func[1]:lower(), "%s+", ""), --removes any whitespace, and lower cases it.
+                            arguments=func[2]
+                        }
+                    end,
                      traverse=function(self)
                         self.at=self.at+1
                         if(self.at>self.total) then return nil end
