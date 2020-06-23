@@ -1,0 +1,32 @@
+[
+	{
+		"title": "Start",
+		"tags": "example, night in the woods style,",
+		"body": "Amy: Well, look at this!\nJoe: Yes, it's Night in the Woods style scripting.\nAmy: How cool! And the way it works, you get the speaker name and the text.\nJoe: Nice! So you can make speech bubbles?\nAmy: Yup! Or you can add avatars. Or character busts. Any number of things?\nJoe: SAWEET.\nAmy: You can even add a choice. Wanna see?\nJoe: Okay. Sure!\nAmy: CHOOSE WISELY.\n[[ answer: |Jump Jump]] \n[[ answer: |stand like a fool]]",
+		"position": {
+			"x": 543,
+			"y": 269
+		},
+		"colorID": 0
+	},
+	{
+		"title": "Jump Jump",
+		"tags": "",
+		"body": "Amy: Jump party time!\nJoe: oh now. I don't want to.\nAmy: Why not?\nJoe: because I don't want to be a jumping joe.\nAmy: Figures.",
+		"position": {
+			"x": 663,
+			"y": 49
+		},
+		"colorID": 0
+	},
+	{
+		"title": "stand like a fool",
+		"tags": "",
+		"body": "Amy: You fool! Why did you choose this one?\nJoe: Come on, don't be so mean.",
+		"position": {
+			"x": 883,
+			"y": 49
+		},
+		"colorID": 0
+	}
+]

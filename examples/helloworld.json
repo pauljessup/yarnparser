@@ -1,0 +1,12 @@
+[
+	{
+		"title": "Start",
+		"tags": "hello world, simple example",
+		"body": "Here's a simple test. This one does nothing more than load this node, display this text. \nConsider this the Hello World for Yarn Files.\n\nSo, with that said...\n\nHello, world!",
+		"position": {
+			"x": 440,
+			"y": 127
+		},
+		"colorID": 0
+	}
+]

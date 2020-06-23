@@ -1,0 +1,12 @@
+[
+	{
+		"title": "Start",
+		"tags": "example, added lua code",
+		"body": "This is a simple example, showing off how you can parse lua code in a command\n\n<< lua: love.graphics.print(\"WILD\", 10, 10) >>",
+		"position": {
+			"x": 301,
+			"y": 200
+		},
+		"colorID": 0
+	}
+]

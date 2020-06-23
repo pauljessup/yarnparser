@@ -1,0 +1,32 @@
+[
+	{
+		"title": "Start",
+		"tags": "simple example, choice example",
+		"body": "Here's another simple example, same as before...\n\nBut this time, you get two choices!\n\n[[ answer: Go Left|left]]\n[[ answer: Go Right|right]]",
+		"position": {
+			"x": 440,
+			"y": 127
+		},
+		"colorID": 0
+	},
+	{
+		"title": "left",
+		"tags": "",
+		"body": "And here we are, in the left hand part of our world.\n\nCool, no?",
+		"position": {
+			"x": 626,
+			"y": 295
+		},
+		"colorID": 0
+	},
+	{
+		"title": "right",
+		"tags": "",
+		"body": "Neato, you went righto",
+		"position": {
+			"x": 931,
+			"y": 161
+		},
+		"colorID": 0
+	}
+]
